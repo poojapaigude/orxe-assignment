@@ -7,6 +7,9 @@ export default class OrxeTimePicker extends LitElement {
 
   @property()
   set timeIntervalInMinutes(value: Number) {
+    if (value === null || value === undefined) {
+      value = 30;
+    }
     this.timeSlotDiff = value;
     this.createTimeInterval(value);
   }
@@ -101,4 +104,7 @@ export default class OrxeTimePicker extends LitElement {
   }
 
   /**
-   *  Getting styles from components custom scs
+   *  Getting styles from components custom scss file
+   */
+  static styles = styles;
+}

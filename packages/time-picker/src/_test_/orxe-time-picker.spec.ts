@@ -55,4 +55,11 @@ describe('orxe-time-picker', () => {
     });
   });
 
+  it('it should create time intervals', () => {
+    const interval = '60';
+    timePicker.createTimeInterval(interval);
+    const arr = [];
+    expect(timePicker.tempTimeSlot.length).toEqual(24);
+  });
+
 });

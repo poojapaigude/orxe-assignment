@@ -31,10 +31,9 @@
         border-bottom: 1px solid rgb(226, 226, 226);
         margin-top: 8px;
     }
+    
 }
 .dropdown:hover {background-color: #ddd;}
-// .dropdown:hover {background-color: var(--selection-color);}
-
 
 .container.open {
     max-height: 350px;
@@ -43,4 +42,8 @@
 .container.closed {
     max-height: 0;
     opacity: 0;
+}
+.checked {
+   background-color: var(--selection-color);
+   color: var(--timer-color);
 }

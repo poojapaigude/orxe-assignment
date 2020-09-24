@@ -4,6 +4,7 @@ import styles from './time-picker-css';
 @customElement('orxe-time-picker')
 export default class OrxeTimePicker extends LitElement {
   timeSlotDiff: Number = 0;
+  index: Number = 0;
 
   @property()
   set timeIntervalInMinutes(value: Number) {
@@ -14,7 +15,7 @@ export default class OrxeTimePicker extends LitElement {
     this.createTimeInterval(value);
   }
 
-  @property() selectedTimeRange = null;
+  @property() selectedTimeRange = '';
 
   @property({ type: String, reflect: true, attribute: 'inputTitle' })
   inputTitle = 'Select Time';
@@ -38,11 +39,14 @@ export default class OrxeTimePicker extends LitElement {
       this.placeholder.display = false;
     }
   }
-
+  /**
+     * Implement `createTimeInterval`  will create an array with given minutes interval
+     */
   createTimeInterval(timeIntervalInMinutes) {
     let x = Number(timeIntervalInMinutes); //input from user as minutes gap
     let startTime = 0; // starting time
     let ap = ['AM', 'PM'];
+    const temp: any = [];
 
     for (let i = 0; startTime < 24 * 60; i++) {
       let hh = Math.floor(startTime / 60);
@@ -54,7 +58,20 @@ export default class OrxeTimePicker extends LitElement {
       if (this.tempTimeSlot[i] === '00:00PM') {
         this.tempTimeSlot[i] = this.noon;
       }
+      const selectedInterval: string = this.tempTimeSlot[i];
       startTime = startTime + x;
+      const d = new Date();
+      const hr = d.getHours();
+      if (hr === hh) {
+        const min = d.getMinutes();
+        const diff = min - mm;
+        temp.push(diff);
+        const minValue = temp.reduce((a, b) => Math.min(a, b))
+        if (minValue === diff) {
+          this.index = i;
+          this.selectedTimeRange = selectedInterval;
+        }
+      }
     }
   }
 
@@ -67,16 +84,16 @@ export default class OrxeTimePicker extends LitElement {
 
     <div class='head' @click='${this.toggleMenu}'>
       <div>${this.selectedTimeRange}</div>
-      ${this.placeholder.display ? html`<span class="placeholder">${this.placeholder.text}</span>` :
+      ${this.placeholder.display && !this.selectedTimeRange ? html`<span class="placeholder">${this.placeholder.text}</span>` :
         html``}
     </div>
     
     <div class="container ${this.closed ? 'closed' : 'open'}">
-      ${this.tempTimeSlot.map(item => html`
+      ${this.tempTimeSlot.map((item, index) => html`
         <div class="dropdown">
           <label class="list-item" for="${item}">
             <input type="radio" id="${item}" name="timeSlot" @click=${this.updateSlot}
-              value="${item}">
+              value="${item}" ?checked=${index === this.index}>
             ${item}
           </label><br>
         </div>
@@ -89,6 +106,9 @@ export default class OrxeTimePicker extends LitElement {
     this.closed = !this.closed;
   }
 
+  /**
+   * Implement `updateSlot` to get selected time interval.
+   */
   updateSlot(target) {
     this.selectedTimeRange = target.srcElement.value;
     this.closed = !this.closed;

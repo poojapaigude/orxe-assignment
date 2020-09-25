@@ -3,19 +3,12 @@ import styles from './time-picker-css';
 
 @customElement('orxe-time-picker')
 export default class OrxeTimePicker extends LitElement {
-  index: Number = 0;
-
-  @property()
-  set timeIntervalInMinutes(value: string|number) {
-    if (value === null || value === undefined || value === '0') {
-      value = 30;
-    }
-    this.createTimeInterval(value);
-  }
+  @property({ type: String, reflect: true, attribute: 'interval' })
+  timeInterval = '30';
 
   @property() selectedTimeRange: string = '';
 
-  @property({ type: String, reflect: true, attribute: 'inputTitle' })
+  @property({ type: String, reflect: true, attribute: 'inputtitle' })
   inputTitle = 'Pick Your Time';
 
   @property({ type: Boolean, reflect: true, attribute: 'closed' })
@@ -27,16 +20,25 @@ export default class OrxeTimePicker extends LitElement {
     text: 'select time range'
   };
 
+  firstUpdated() {
+    this.createTimeInterval(this.timeInterval);
+  }
+
   tempTimeSlot: string[] = [];
   midnight: string = 'Midnight';
   noon: string = 'Noon';
+  index: Number = 0;
 
   constructor() {
     super();
     if (this.selectedTimeRange) {
       this.placeholder.display = false;
     }
+    if (!this.timeInterval) {
+      this.createTimeInterval('30');
+    }
   }
+  
   /**
      * Implement `createTimeInterval`  will create an array with given minutes interval
     */
@@ -44,8 +46,10 @@ export default class OrxeTimePicker extends LitElement {
     let x = Number(timeIntervalInMinutes); //input from user as minutes gap
     let startTime = 0; // starting time
     let ap = ['AM', 'PM'];
-    const temp: any = [];
-
+    let store = 0;
+    const d = new Date();
+    const hr = d.getHours();
+    const min = d.getMinutes();
     for (let i = 0; startTime < 24 * 60; i++) {
       let hh = Math.floor(startTime / 60);
       let mm = (startTime % 60);
@@ -59,17 +63,12 @@ export default class OrxeTimePicker extends LitElement {
       startTime = startTime + x;
       const selectedInterval: string = this.tempTimeSlot[i];
 
-      const d = new Date();
-      const hr = d.getHours();
       if (hr === hh) {
-        const min = d.getMinutes();
-        const diff = min - mm;
-        temp.push(diff);
-        const minValue = temp.reduce((a, b) => Math.min(a, b))
-        if (minValue === diff) {
+        if (min >= store && min >= mm) {
           this.index = i;
           this.selectedTimeRange = selectedInterval;
         }
+        store = mm;
       }
     }
   }

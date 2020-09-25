@@ -12,7 +12,7 @@ import styles from './time-picker-css';
 let OrxeTimePicker = class OrxeTimePicker extends LitElement {
     constructor() {
         super();
-        this.index = 0;
+        this.timeInterval = '30';
         this.selectedTimeRange = '';
         this.inputTitle = 'Pick Your Time';
         this.closed = true;
@@ -23,21 +23,25 @@ let OrxeTimePicker = class OrxeTimePicker extends LitElement {
         this.tempTimeSlot = [];
         this.midnight = 'Midnight';
         this.noon = 'Noon';
+        this.index = 0;
         if (this.selectedTimeRange) {
             this.placeholder.display = false;
         }
-    }
-    set timeIntervalInMinutes(value) {
-        if (value === null || value === undefined || value === '0') {
-            value = 30;
+        if (!this.timeInterval) {
+            this.createTimeInterval('30');
         }
-        this.createTimeInterval(value);
+    }
+    firstUpdated() {
+        this.createTimeInterval(this.timeInterval);
     }
     createTimeInterval(timeIntervalInMinutes) {
         let x = Number(timeIntervalInMinutes);
         let startTime = 0;
         let ap = ['AM', 'PM'];
-        const temp = [];
+        let store = 0;
+        const d = new Date();
+        const hr = d.getHours();
+        const min = d.getMinutes();
         for (let i = 0; startTime < 24 * 60; i++) {
             let hh = Math.floor(startTime / 60);
             let mm = (startTime % 60);
@@ -50,17 +54,12 @@ let OrxeTimePicker = class OrxeTimePicker extends LitElement {
             }
             startTime = startTime + x;
             const selectedInterval = this.tempTimeSlot[i];
-            const d = new Date();
-            const hr = d.getHours();
             if (hr === hh) {
-                const min = d.getMinutes();
-                const diff = min - mm;
-                temp.push(diff);
-                const minValue = temp.reduce((a, b) => Math.min(a, b));
-                if (minValue === diff) {
+                if (min >= store && min >= mm) {
                     this.index = i;
                     this.selectedTimeRange = selectedInterval;
                 }
+                store = mm;
             }
         }
     }
@@ -110,16 +109,15 @@ let OrxeTimePicker = class OrxeTimePicker extends LitElement {
 };
 OrxeTimePicker.styles = styles;
 __decorate([
-    property(),
-    __metadata("design:type", Object),
-    __metadata("design:paramtypes", [Object])
-], OrxeTimePicker.prototype, "timeIntervalInMinutes", null);
+    property({ type: String, reflect: true, attribute: 'interval' }),
+    __metadata("design:type", Object)
+], OrxeTimePicker.prototype, "timeInterval", void 0);
 __decorate([
     property(),
     __metadata("design:type", String)
 ], OrxeTimePicker.prototype, "selectedTimeRange", void 0);
 __decorate([
-    property({ type: String, reflect: true, attribute: 'inputTitle' }),
+    property({ type: String, reflect: true, attribute: 'inputtitle' }),
     __metadata("design:type", Object)
 ], OrxeTimePicker.prototype, "inputTitle", void 0);
 __decorate([
